@@ -63,10 +63,16 @@ xt, yt, _, tnames = next(iter(eval_dataloader))
 x_min, x_max = x.min(), x.max()
 
 idx = 0
+#display([re_normalize(x[idx].permute(1,2,0).numpy()), cityscapes_label_to_rgb(y[idx])])
+#display([re_normalize(xv[idx].permute(1,2,0).numpy()), cityscapes_label_to_rgb(yv[idx])])
+#display([re_normalize(xt[idx].permute(1,2,0).numpy()), cityscapes_label_to_rgb(yt[idx])])
+
+
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-print(device)
+
 model = HRNet(cfg).to(device)
+
 
 criterion = CrossEntropy(
     ignore_label=cfg.DATASET.IGNORE_LABEL, 
@@ -87,10 +93,10 @@ model.eval()
 
 
 
-def run_train_loop(config):
+def run_train_loop():
     
     logger, final_output_dir, tb_log_dir = create_logger(
-        config, 
+        cfg, 
         cfg_name="seg_hrnet_w48_train_512x512_sgd_lr1e-2_wd5e-4_bs_12_epoch484", 
         phase='train'
     )
@@ -110,7 +116,7 @@ def run_train_loop(config):
     for epoch in range(cfg.TRAIN.EPOCHS):
 
         train(
-            config=config, 
+            config=cfg, 
             dataloader=train_dataloader, 
             model=model, 
             loss_fn=criterion, 
@@ -122,7 +128,7 @@ def run_train_loop(config):
         )
 
         valid_loss, mean_IoU, IoU_array = validate(
-            config=config, 
+            config=cfg, 
             dataloader=valid_dataloader, 
             model=model,  
             loss_fn=criterion,
@@ -152,7 +158,7 @@ def run_train_loop(config):
     logger.info('Hours: %d' % np.int((end-start)/3600))
     logger.info('Done')
 
-run_train_loop(cfg)
+run_train_loop()
 
 #testvideo(config, video_dataloader, model, sv_dir='outputs', sv_pred=True)
 
