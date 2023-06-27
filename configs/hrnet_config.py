@@ -7,24 +7,24 @@ from yacs.config import CfgNode as CN
 
 config = CN()
 
-config.NAME = 'hrnet_w48train_512x1024_sgd_lr1e-2_wd5e-4_bs_12_epoch484'
+config.NAME = 'hrnet_w48train_512x512_sgd_lr1e-2_wd5e-4_bs_12_epoch484'
 config.OUTPUT_DIR = 'outputs'
 config.LOG_DIR = 'logs'
 
 
 config.DATASET = CN()
-config.DATASET.NAME = 'cityscapes'
-config.DATASET.DATA_DIR = 'data/cityscapes'
-config.DATASET.INPUT_PATTERN = '*_leftImg8bit.png'
-config.DATASET.ANNOT_PATTERN = '*_gtFine_labelIds.png'
-config.DATASET.IMAGE_DIR = 'leftImg8bit'
-config.DATASET.LABEL_DIR = 'gtFine'
-config.DATASET.NUM_CLASSES = 19
-config.DATASET.IGNORE_LABEL = 255
+config.DATASET.NAME = 'CelebA_data'
+config.DATASET.DATA_DIR = 'data/CelebA_data'
+config.DATASET.INPUT_PATTERN = '*.jpg'
+config.DATASET.ANNOT_PATTERN = '*.png'
+config.DATASET.IMAGE_DIR = 'image'
+config.DATASET.LABEL_DIR = 'label'
+config.DATASET.NUM_CLASSES = 2
+config.DATASET.IGNORE_LABEL = 0
 config.DATASET.MEAN = [0.485, 0.456, 0.406]
 config.DATASET.STD = [0.229, 0.224, 0.225]
-config.DATASET.BASE_SIZE = (1024, 2048)
-config.DATASET.CROP_SIZE = (512, 1024)
+config.DATASET.BASE_SIZE = (512, 512)
+config.DATASET.CROP_SIZE = (512, 512)
 
 config.TRAIN = CN()
 config.TRAIN.EPOCHS = 484
