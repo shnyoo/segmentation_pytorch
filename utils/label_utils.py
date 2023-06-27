@@ -52,7 +52,7 @@ def get_labels():
     # Further note that the current train IDs are only a suggestion. You can use whatever you like.
     # Make sure to provide your results using the original IDs and not the training IDs.
     # Note that many IDs are ignored in evaluation and thus you never need to predict these!
-
+    '''
     labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
     Label(  'unlabeled'            ,  0 ,      255 , 'void'            , 0       , False        , True         , (  0,  0,  0) ),
@@ -91,5 +91,10 @@ def get_labels():
     Label(  'bicycle'              , 33 ,       18 , 'vehicle'         , 7       , True         , False        , (119, 11, 32) ),
     Label(  'license plate'        , -1 ,       -1 , 'vehicle'         , 7       , False        , True         , (  0,  0,142) ),
     ]
-    
+    '''
+    labels= [
+    Label(  'skin'                , 1 ,       122 , 'skin'         , 1       , True         , False        , (  122, 122,122) ),
+    Label(  'hair'                , 2 ,       255, 'hair'         , 2       , True         , False        , (  255, 255,255) ),
+
+    ]
     return labels

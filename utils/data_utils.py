@@ -36,16 +36,16 @@ class SegmentationDataset(torch.utils.data.Dataset):
         search_image_files = os.path.join(
             cfg.DATA_DIR,
             cfg.IMAGE_DIR, 
-            split, '*', 
+            split, 
             cfg.INPUT_PATTERN)
 
         if labels:
             search_annot_files = os.path.join(
                 cfg.DATA_DIR,
                 cfg.LABEL_DIR, 
-                split, '*', 
+                split,  
                 cfg.ANNOT_PATTERN)
-        
+     
         
         # root directory
         root = pathlib.Path.cwd() 
