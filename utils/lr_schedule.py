@@ -61,8 +61,9 @@ class LrUpdater():
                 param_group['lr'] = lr
 
     def get_lr(self, base_lr):
+        print("yes")
         raise NotImplementedError
-
+        print("no")
     def get_regular_lr(self):
         if isinstance(self.optimizer, dict):
             lr_groups = {}

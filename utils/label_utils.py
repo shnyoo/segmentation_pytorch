@@ -93,8 +93,9 @@ def get_labels():
     ]
     '''
     labels= [
-    Label(  'skin'                , 1 ,       122 , 'skin'         , 1       , True         , False        , (  122, 122,122) ),
-    Label(  'hair'                , 2 ,       255, 'hair'         , 2       , True         , False        , (  255, 255,255) ),
-
+    Label(  'bg'                , 0 ,       0, 'bg'         , 0       , True         , False        , (  0, 0,0) ),    
+    Label(  'skin'                , 1 ,       1 , 'skin'         , 1       , True         , False        , (  122, 122,122) ),
+    Label(  'hair'                , 2 ,       2, 'hair'         , 2       , True         , False        , (  255, 255,255) ),
+    
     ]
     return labels

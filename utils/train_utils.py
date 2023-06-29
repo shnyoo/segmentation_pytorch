@@ -69,7 +69,7 @@ class CrossEntropy(nn.Module):
     def _forward(self, score, target):
         loss = self.criterion(score, target)
         return loss
-
+    
     def forward(self, score, target):
         score = [score]
         weights = [1]
@@ -88,7 +88,7 @@ def create_logger(cfg, cfg_name, phase='train'):
     if not root_log_dir.exists():
         print('=> creating {}'.format(root_log_dir))
         root_log_dir.mkdir()
-
+    
     dataset = cfg.DATASET.NAME
     model = cfg.MODEL.NAME
     # cfg_name = os.path.basename(cfg_name).split('.')[0]
@@ -120,10 +120,11 @@ def get_confusion_matrix(label, pred, size, num_class, ignore=-1):
     """
     Calcute the confusion matrix by given label and pred
     """
-    output = pred.cpu().numpy().transpose(0, 2, 3, 1)
-    seg_pred = np.asarray(np.argmax(output, axis=3), dtype=np.uint8)
+    
+    output = pred.cpu().numpy()
+    seg_pred = np.asarray(output, dtype=np.uint8)
     seg_gt = np.asarray(label.cpu().numpy()[:, :size[-2], :size[-1]], dtype=np.int32)
-
+  
     ignore_index = seg_gt != ignore
     seg_gt = seg_gt[ignore_index]
     seg_pred = seg_pred[ignore_index]

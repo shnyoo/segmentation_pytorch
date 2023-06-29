@@ -67,11 +67,7 @@ class SegmentationDataset(torch.utils.data.Dataset):
             
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
         
-        self.class_weights = torch.FloatTensor([0.8373, 0.918, 0.866, 1.0345, 
-                                   1.0166, 0.9969, 0.9754, 1.0489,
-                                   0.8786, 1.0023, 0.9539, 0.9843, 
-                                   1.1116, 0.9037, 1.0865, 1.0955, 
-                                   1.0865, 1.1529, 1.0507]).to(self.device)
+        self.class_weights = torch.FloatTensor([1.1529, 1.0507,1.2507]).to(self.device)
        
 
     def __len__(self):

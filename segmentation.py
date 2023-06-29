@@ -14,7 +14,7 @@ from tqdm import tqdm
 from models.hrnet import HRNet
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-#from tensorboardX import SummaryWriter
+from tensorboardX import SummaryWriter
 
 
 from utils.transformations import re_normalize
@@ -25,6 +25,7 @@ from utils.train_utils import AverageMeter, CrossEntropy, get_confusion_matrix, 
 from utils.transformation_pipelines import (get_transforms_training, get_transforms_validation, 
                                             get_transforms_evaluation, get_transforms_video)
 from configs.hrnet_config import config as cfg
+from utils.lr_schedule import LrUpdater,PolyLrUpdater
 
 labels = get_labels()
 id2label =      { label.id      : label for label in labels }
@@ -93,6 +94,8 @@ model.eval()
 
 
 
+lr_scheduler=PolyLrUpdater(max_iters=cfg.TRAIN.DECAY_STEPS,optimizer=optimizer,epoch_len=cfg.TRAIN.EPOCHS)
+
 def run_train_loop():
     
     logger, final_output_dir, tb_log_dir = create_logger(
@@ -105,37 +108,42 @@ def run_train_loop():
     # logger.info(get_model_summary(model.cuda(), dump_input.cuda()))
 
     writer_dict = {
-        #'writer': SummaryWriter(tb_log_dir),
+        'writer': SummaryWriter(tb_log_dir),
         'train_global_steps': 0,
         'valid_global_steps': 0,
     }
 
     best_mIoU = 0
-
+    
     start = timeit.default_timer()
+    
     for epoch in range(cfg.TRAIN.EPOCHS):
-
+        
         train(
-            config=cfg, 
+            cfg=cfg, 
             dataloader=train_dataloader, 
             model=model, 
             loss_fn=criterion, 
             optimizer=optimizer, 
+            lr_scheduler=lr_scheduler,
             epoch=epoch, 
             scaler=torch.cuda.amp.GradScaler(),
             writer_dict=writer_dict
           
         )
+        
+        print(epoch,"epoch train finish")
 
         valid_loss, mean_IoU, IoU_array = validate(
-            config=cfg, 
+            cfg=cfg, 
             dataloader=valid_dataloader, 
             model=model,  
             loss_fn=criterion,
-            writer_dict=writer_dict
+            writer_dict=writer_dict,
+            trainid2label=trainid2label
         
         )
-
+        
         torch.save({
             'epoch': epoch+1,
             'best_mIoU': best_mIoU,
@@ -163,7 +171,7 @@ run_train_loop()
 #testvideo(config, video_dataloader, model, sv_dir='outputs', sv_pred=True)
 
 
-#print("mean IoU: {:.3f}, mean Accuracy: {:.3f}, Pixel Accuracy: {:.3f}".format(mean_IoU, mean_acc, pixel_acc))
+print("mean IoU: {:.3f}, mean Accuracy: {:.3f}, Pixel Accuracy: {:.3f}".format(mean_IoU, mean_acc, pixel_acc))
 
 
 

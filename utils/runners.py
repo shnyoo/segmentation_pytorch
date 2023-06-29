@@ -27,75 +27,84 @@ def train(
     
     ave_loss = AverageMeter()
     steps_tot = epoch*len(dataloader) 
+
     writer = writer_dict['writer']
     global_steps = writer_dict['train_global_steps']
     
     for step, batch in enumerate(dataloader):
         X, y, _, _ = batch
-        X, y = X.cuda(), y.long().cuda() 
-        
+        X, y = X.cuda(), y.float().cuda() 
         # Compute prediction and loss
         with torch.cuda.amp.autocast():
             pred = model(X)
+            y=torch.stack((y,y,y),dim=1)       
             losses = loss_fn(pred, y)
         loss = losses.mean()
-        
+       
         # Backpropagation
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
         optimizer.zero_grad()
-        
         # update average loss
         ave_loss.update(loss.item())
-        
         # update learning schedule
         lr_scheduler.before_train_iter()
+        
         lr = lr_scheduler.get_lr(int(steps_tot+step), cfg.TRAIN.BASE_LR)
         #lr = adjust_learning_rate(optimizer, cfg['BASE_LR'], cfg['END_LR'], step+steps_tot, cfg['DECAY_STEPS'])
-        
+        print(step,"step is finish!(Train)")
+   
     writer.add_scalar('train_loss', ave_loss.average(), global_steps)
     writer_dict['train_global_steps'] = global_steps + 1
 
             
 
-def validate(cfg, dataloader, model, loss_fn, writer_dict):
+def validate(cfg, dataloader, model, loss_fn, writer_dict,trainid2label ):
     model.eval()
     
     ave_loss = AverageMeter()
-    iter_steps = len(dataloader.dataset) // cfg.BATCH_SIZE
-    confusion_matrix = np.zeros((cfg.NUM_CLASSES, cfg.NUM_CLASSES, 1))
+    iter_steps = len(dataloader.dataset) // cfg.TRAIN.BATCH_SIZE
+    confusion_matrix = np.zeros((cfg.DATASET.NUM_CLASSES, cfg.DATASET.NUM_CLASSES, 1))
     
     with torch.no_grad():
         for idx, batch in enumerate(dataloader):
-            x, y, _, _ = batch
-            size = y.size()
-            X, y = X.cuda(), y.long().cuda()
+            X, y, _, _ = batch
+            X, y = X.cuda(), y.float().cuda()
             
             pred = model(X)
+            y=torch.stack((y,y,y),dim=1) 
+            size = y.size()
             losses = loss_fn(pred, y)
             loss = losses.mean()   
             
+            
             if not isinstance(pred, (list, tuple)):
                 pred = [pred]    
-            for i, x in enumerate(pred):
+            
+            for i, x in enumerate(pred):             
                 confusion_matrix[..., i] += get_confusion_matrix(
-                    y, x, size, cfg.DATASET.NUM_CLASSES, cfg.DATASET.NUM_CLASSES)
+                    y, x, size, cfg.DATASET.NUM_CLASSES)
             ave_loss.update(loss.item())
+  
             
     pos = confusion_matrix[..., 0].sum(1)
     res = confusion_matrix[..., 0].sum(0)
     tp = np.diag(confusion_matrix[..., 0])
     IoU_array = (tp / np.maximum(1.0, pos + res - tp))
     mean_IoU = IoU_array.mean()
-    
+
+
     writer = writer_dict['writer']
     global_steps = writer_dict['valid_global_steps']
     writer.add_scalar('valid_loss', ave_loss.average(), global_steps)
     writer.add_scalar('valid_mIoU', mean_IoU, global_steps)
+    
     for key, val in trainid2label.items():
+    
         if key != cfg.DATASET.IGNORE_LABEL and key != -1:
             writer.add_scalar('valid_mIoU_{}'.format(val.name), IoU_array[key], global_steps)    
+    
     writer_dict['valid_global_steps'] = global_steps + 1
         
     return ave_loss.average(), mean_IoU, IoU_array
